@@ -1,0 +1,17 @@
+def crack_text_file(text_file_path, dictionary_file_path):
+    with open(dictionary_file_path, 'r') as f:
+        for line in f:
+            password = line.strip()
+            try:
+                with open(text_file_path, 'r') as file:
+                    first_line = file.readline().strip()
+                    if first_line == password:
+                        print(f"Password found: {password}")
+                        return
+            except:
+                continue
+    print("Password not found.")
+
+text_file_path = input("Enter the path to the text file: ")
+dictionary_file_path = input("Enter the path to the dictionary file: ")
+crack_text_file(text_file_path, dictionary_file_path)
