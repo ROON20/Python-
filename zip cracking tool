@@ -1,0 +1,24 @@
+import pyzipper
+
+zip_path = input("Enter the path to the encrypted ZIP file: ").strip()
+dict_path = input("Enter the path to the dictionary file: ").strip()
+
+def crack_zip(zip_path, dict_path):
+   
+    with pyzipper.AESZipFile(zip_path) as zip_file:
+            with open(dict_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    password = line.strip()
+                    try:
+                        zip_file.extractall(pwd=password.encode('utf-8'))
+                        print(f"Password Found: {password}")
+                        return
+                    except:
+
+                        continue
+        
+    print("Password Not Found.")
+
+
+
+crack_zip(zip_path, dict_path)
