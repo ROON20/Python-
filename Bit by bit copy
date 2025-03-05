@@ -1,0 +1,58 @@
+import os
+import sys
+import time
+
+def copy_disk_bit_by_bit(source_device, output_file):
+    try:
+        start_time = time.time()
+        with open(source_device, 'rb') as src, open(output_file, 'wb') as dest:
+            buffer_size = 4096
+            total_copied = 0
+            while True:
+                chunk = src.read(buffer_size)
+                if not chunk:
+                    break
+                dest.write(chunk)
+                total_copied += len(chunk)
+                if total_copied % (1024 * 1024) == 0:
+                    print(f"Copied {total_copied // (1024 * 1024)} MB...")
+        end_time = time.time()
+        print(f"Copy completed. Total bytes copied: {total_copied}")
+        print(f"Total processing time: {end_time - start_time:.2f} seconds")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        sys.exit(1)
+
+def create_e01(source_device, output_file):
+    try:
+        import pyewf
+        ewf_handle = pyewf.handle()
+        ewf_handle.open(source_device)
+        with open(output_file, 'wb') as e01_file:
+            buffer_size = 4096
+            while True:
+                data = ewf_handle.read(buffer_size)
+                if not data:
+                    break
+                e01_file.write(data)
+        ewf_handle.close()
+        print(f"E01 file created successfully at {output_file}")
+    except ImportError:
+        print("pyewf library is required. Install it using 'pip install pyewf'.")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if not os.geteuid() == 0:
+    print("This script requires root privileges. Please run as root.")
+    sys.exit(1)
+
+source_device = input("Enter the source device path (e.g., /dev/sdX): ")
+output_path = input("Enter the output file path (e.g., /path/to/disk_copy): ")
+output_extension = input("Enter the file extension (e.g., .img, .dd, .bin, .E01): ").lower()
+output_file = output_path + output_extension
+
+print(f"Starting copy from {source_device} to {output_file}...")
+if output_extension == '.e01':
+    create_e01(source_device, output_file)
+else:
+    copy_disk_bit_by_bit(source_device, output_file)
